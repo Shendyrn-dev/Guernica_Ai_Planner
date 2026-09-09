@@ -13,7 +13,8 @@ function activeProvider(): Provider {
 const OPENROUTER_FALLBACKS = [
   "google/gemma-4-31b-it:free",
   "google/gemma-4-26b-a4b-it:free",
-  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+  "liquid/lfm-2.5-2.6b:free",
+  "cohere/north-mini-code:free",
 ];
 
 const FAST_DEFAULTS: Record<Provider, string> = {
@@ -169,6 +170,10 @@ function openaiMarkdown(system: string, user: string, modelName?: string): Promi
   );
 }
 
+function isAuthErr(msg: string): boolean {
+  return /401|unauthorized|invalid.*key|api key/i.test(msg);
+}
+
 async function tryOpenRouterJSON<T>(client: ReturnType<typeof openRouterClient>, system: string, user: string, modelName?: string): Promise<T> {
   const models = [openrouterModel(modelName), ...OPENROUTER_FALLBACKS.filter((m) => m !== openrouterModel(modelName))];
   let lastErr: unknown;
@@ -191,8 +196,9 @@ async function tryOpenRouterJSON<T>(client: ReturnType<typeof openRouterClient>,
       return JSON.parse(cleaned) as T;
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      if (!/No endpoints|404|not found/i.test(msg)) throw e;
       lastErr = e;
+      if (isAuthErr(msg)) throw e;
+      console.error(`[openrouterJSON] ${model} failed:`, msg.slice(0, 400));
     }
   }
   throw lastErr;
@@ -230,8 +236,9 @@ async function tryOpenRouterMarkdown(client: ReturnType<typeof openRouterClient>
       return out;
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      if (!/No endpoints|404|not found/i.test(msg)) throw e;
       lastErr = e;
+      if (isAuthErr(msg)) throw e;
+      console.error(`[openrouterMarkdown] ${model} failed:`, msg.slice(0, 400));
     }
   }
   throw lastErr;
@@ -278,8 +285,9 @@ async function* tryOpenRouterStream(client: ReturnType<typeof openRouterClient>,
       return;
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      if (!/No endpoints|404|not found/i.test(msg)) throw e;
       lastErr = e;
+      if (isAuthErr(msg)) throw e;
+      console.error(`[openrouterStream] ${model} failed:`, msg.slice(0, 400));
     }
   }
   throw lastErr;
