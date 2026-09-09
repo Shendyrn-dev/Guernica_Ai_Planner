@@ -90,7 +90,7 @@ Isi salah satu provider (prioritas: OpenRouter → Gemini → OpenAI):
 ```env
 # OpenRouter (recommended, free) — https://openrouter.ai/keys
 OPENROUTER_API_KEY=sk-or-v1-...
-OPENROUTER_MODEL=google/gemini-2.0-flash-exp:free
+OPENROUTER_MODEL=google/gemma-4-31b-it:free
 OPENROUTER_SITE_URL=http://localhost:3000
 OPENROUTER_TITLE=AI Planner
 CLARIFY_TIMEOUT_MS=25000

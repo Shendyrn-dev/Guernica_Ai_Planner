@@ -10,8 +10,14 @@ function activeProvider(): Provider {
   throw new Error("Missing API key. Isi OPENROUTER_API_KEY (OpenRouter) atau GOOGLE_API_KEY atau OPENAI_API_KEY di .env.local");
 }
 
+const OPENROUTER_FALLBACKS = [
+  "google/gemma-4-31b-it:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+];
+
 const FAST_DEFAULTS: Record<Provider, string> = {
-  openrouter: "google/gemini-2.0-flash-exp:free",
+  openrouter: "google/gemma-4-31b-it:free",
   gemini: "gemini-2.0-flash",
   openai: "gpt-4o-mini",
 };
@@ -163,12 +169,13 @@ function openaiMarkdown(system: string, user: string, modelName?: string): Promi
   );
 }
 
-async function openrouterJSON<T>(system: string, user: string, modelName?: string): Promise<T> {
-  const client = openRouterClient();
-  return withTimeout(
-    retry(async () => {
+async function tryOpenRouterJSON<T>(client: ReturnType<typeof openRouterClient>, system: string, user: string, modelName?: string): Promise<T> {
+  const models = [openrouterModel(modelName), ...OPENROUTER_FALLBACKS.filter((m) => m !== openrouterModel(modelName))];
+  let lastErr: unknown;
+  for (const model of models) {
+    try {
       const res = await client.chat.completions.create({
-        model: openrouterModel(modelName),
+        model,
         messages: [
           { role: "system", content: clampStr(system) + "\n\nReturn JSON only. No markdown fence." },
           { role: "user", content: clampStr(user) },
@@ -182,18 +189,31 @@ async function openrouterJSON<T>(system: string, user: string, modelName?: strin
       const m = text.match(/\{[\s\S]*\}/);
       const cleaned = (m ? m[0] : text).replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
       return JSON.parse(cleaned) as T;
-    }, 2, "openrouter"),
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (!/No endpoints|404|not found/i.test(msg)) throw e;
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}
+
+async function openrouterJSON<T>(system: string, user: string, modelName?: string): Promise<T> {
+  const client = openRouterClient();
+  return withTimeout(
+    retry(() => tryOpenRouterJSON<T>(client, system, user, modelName), 2, "openrouter"),
     CLARIFY_TIMEOUT_MS,
     "openrouter"
   );
 }
 
-function openrouterMarkdown(system: string, user: string, modelName?: string): Promise<string> {
-  const client = openRouterClient();
-  return withTimeout(
-    retry(async () => {
+async function tryOpenRouterMarkdown(client: ReturnType<typeof openRouterClient>, system: string, user: string, modelName?: string): Promise<string> {
+  const models = [openrouterModel(modelName), ...OPENROUTER_FALLBACKS.filter((m) => m !== openrouterModel(modelName))];
+  let lastErr: unknown;
+  for (const model of models) {
+    try {
       const res = await client.chat.completions.create({
-        model: openrouterModel(modelName),
+        model,
         messages: [
           { role: "system", content: clampStr(system) },
           { role: "user", content: clampStr(user) },
@@ -208,10 +228,18 @@ function openrouterMarkdown(system: string, user: string, modelName?: string): P
         if (typeof delta === "string") out += delta;
       }
       return out;
-    }, 2, "openrouter"),
-    PLAN_TIMEOUT_MS,
-    "openrouter"
-  );
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (!/No endpoints|404|not found/i.test(msg)) throw e;
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}
+
+function openrouterMarkdown(system: string, user: string, modelName?: string): Promise<string> {
+  const client = openRouterClient();
+  return withTimeout(retry(() => tryOpenRouterMarkdown(client, system, user, modelName), 2, "openrouter"), PLAN_TIMEOUT_MS, "openrouter");
 }
 
 export async function generateJSON<T>(opts: { system: string; user: string; model?: string }): Promise<T> {
@@ -228,6 +256,35 @@ export async function generateMarkdown(opts: { system: string; user: string; mod
   return openaiMarkdown(opts.system, opts.user, opts.model);
 }
 
+async function* tryOpenRouterStream(client: ReturnType<typeof openRouterClient>, sys: string, usr: string, modelName?: string): AsyncGenerator<string, void, unknown> {
+  const models = [openrouterModel(modelName), ...OPENROUTER_FALLBACKS.filter((m) => m !== openrouterModel(modelName))];
+  let lastErr: unknown;
+  for (const model of models) {
+    try {
+      const res = await client.chat.completions.create({
+        model,
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: usr },
+        ],
+        temperature: 0.5,
+        max_tokens: 6000,
+        stream: true,
+      } as never);
+      for await (const chunk of res as unknown as AsyncIterable<{ choices?: Array<{ delta?: { content?: string } }> }>) {
+        const delta = chunk.choices?.[0]?.delta?.content;
+        if (typeof delta === "string") yield delta;
+      }
+      return;
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (!/No endpoints|404|not found/i.test(msg)) throw e;
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}
+
 export async function* streamMarkdown(opts: { system: string; user: string; model?: string }): AsyncGenerator<string, void, unknown> {
   const p = activeProvider();
   const sys = clampStr(opts.system);
@@ -235,20 +292,7 @@ export async function* streamMarkdown(opts: { system: string; user: string; mode
 
   if (p === "openrouter") {
     const client = openRouterClient();
-    const res = await client.chat.completions.create({
-      model: openrouterModel(opts.model),
-      messages: [
-        { role: "system", content: sys },
-        { role: "user", content: usr },
-      ],
-      temperature: 0.5,
-      max_tokens: 6000,
-      stream: true,
-    } as never);
-    for await (const chunk of res as unknown as AsyncIterable<{ choices?: Array<{ delta?: { content?: string } }> }>) {
-      const delta = chunk.choices?.[0]?.delta?.content;
-      if (typeof delta === "string") yield delta;
-    }
+    yield* tryOpenRouterStream(client, sys, usr, opts.model);
     return;
   }
 
