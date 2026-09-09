@@ -3,6 +3,8 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { ArrowLeft, Copy, Download, Loader2, Sparkles, Check, Square } from "lucide-react";
 import { motion } from "motion/react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Nav, Footer } from "@/components/landing/sections";
@@ -366,7 +368,16 @@ export default function CreatePage() {
                     <span className="font-mono text-xs">blueprint.md {loading && "• streaming"}</span>
                     <span className="inline-flex items-center gap-1.5 font-mono text-xs">{loading ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Menulis…</> : <><Check className="h-3.5 w-3.5" /> Validated</>}</span>
                   </div>
-                  <pre className="max-h-[64vh] overflow-auto bg-neutral-100 p-4 font-mono text-xs leading-relaxed whitespace-pre-wrap md:p-6 md:text-[13px] dark:bg-neutral-900">{markdown || (loading ? "▌" : "")}{loading && "▌"}</pre>
+                  <div className="max-h-[64vh] overflow-auto bg-white p-6 text-sm leading-[1.75] md:p-8 md:text-[15px] dark:bg-black">
+                    {markdown ? (
+                      <article className="[&_h1]:mt-8 [&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:tracking-tight [&_h1]:first:mt-0 [&_h2]:mt-6 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:tracking-tight [&_h3]:mt-5 [&_h3]:text-base [&_h3]:font-semibold [&_p]:mt-3 [&_p]:text-neutral-700 [&_p]:dark:text-neutral-300 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-1.5 [&_ol]:mt-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:space-y-1.5 [&_li]:leading-relaxed [&_table]:mt-4 [&_table]:w-full [&_table]:text-sm [&_th]:border [&_th]:bg-neutral-100 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold [&_th]:dark:bg-neutral-900 [&_td]:border [&_td]:px-3 [&_td]:py-2 [&_td]:align-top [&_code]:bg-neutral-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em] [&_code]:dark:bg-neutral-900 [&_pre]:mt-4 [&_pre]:overflow-auto [&_pre]:bg-neutral-100 [&_pre]:p-4 [&_pre]:font-mono [&_pre]:text-xs [&_pre]:leading-relaxed [&_pre]:dark:bg-neutral-900 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_hr]:my-6 [&_blockquote]:mt-4 [&_blockquote]:border-l-2 [&_blockquote]:border-black [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-semibold [&_a]:underline [&_a]:underline-offset-4">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+                        {loading && <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-black align-middle dark:bg-white" />}
+                      </article>
+                    ) : (
+                      loading && <span className="inline-block h-4 w-2 animate-pulse bg-black dark:bg-white" />
+                    )}
+                  </div>
                 </div>
               </Reveal>
               <Reveal y={10}>
