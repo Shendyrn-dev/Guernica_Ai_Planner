@@ -2,9 +2,9 @@ import { Nav, Hero, How, OutputBento, CTA, Footer } from "@/components/landing/s
 
 export default function Home() {
   return (
-    <div className="flex flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <Nav />
-      <main>
+      <main className="flex-1">
         <Hero />
         <How />
         <OutputBento />

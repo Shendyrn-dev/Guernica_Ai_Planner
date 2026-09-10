@@ -184,7 +184,7 @@ export default function CreatePage() {
   }
 
   return (
-    <div className="flex min-w-0 flex-col overflow-x-hidden">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden">
       <Nav />
 
       <SonarGrid className="bg-transparent overflow-hidden" spacing={28} baseOpacity={0.1} pingEvery={3.4} interactive pingArea={[0.18, 0.12, 0.82, 0.88]}>

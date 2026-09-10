@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 const navItems = [
   { name: "Cara kerja", href: "#cara-kerja" },
   { name: "Output", href: "#output" },
-  { name: "Informasi", href: "#untuk-siapa" },
+  { name: "Informasi", href: "#footer" },
 ];
 
 const EXPAND_SCROLL_THRESHOLD = 80;

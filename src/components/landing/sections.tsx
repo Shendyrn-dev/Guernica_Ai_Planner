@@ -388,10 +388,15 @@ export function CTA() {
 
 export function Footer() {
   return (
-    <footer className="overflow-hidden bg-black py-8 dark:bg-white">
-      <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-4 sm:gap-6 sm:px-6 md:flex-row md:items-center md:justify-between">
+    <footer id="footer" className="mt-auto w-full overflow-hidden bg-black pt-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-10 dark:bg-white">
+      <div className="mx-auto flex max-w-[1280px] flex-col gap-6 px-4 sm:px-6 md:flex-row md:items-center md:justify-between">
         <span className="flex flex-col gap-2 text-sm text-neutral-400 sm:flex-row sm:items-center dark:text-neutral-600"><span className="flex items-center gap-2 font-semibold tracking-tight text-white dark:text-black"><img src="/guernica.png" alt="Guernica" className="h-5 w-5 object-contain dark:invert" />Guernica</span><span className="text-xs sm:text-sm">© 2026 — Blueprint sebelum coding.</span></span>
-        <span className="flex gap-6 text-sm text-neutral-400 dark:text-neutral-600"><a href="#" className="hover:text-white dark:hover:text-black">Docs</a><a href="#" className="hover:text-white dark:hover:text-black">Changelog</a><a href="#" className="hover:text-white dark:hover:text-black">Privacy</a></span>
+        <span className="flex flex-wrap items-center gap-5 text-sm text-neutral-400 dark:text-neutral-600">
+          <a href="https://github.com/shendyrn-dev" target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-white dark:hover:text-black"><svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true"><path d="M12 2.5a9.75 9.75 0 0 0-3.08 19c.48.09.66-.21.66-.47v-1.69c-2.7.58-3.27-1.15-3.27-1.15-.44-1.12-1.08-1.42-1.08-1.42-.88-.6.07-.59.07-.59 1 .07 1.52 1.03 1.52 1.03.87 1.48 2.28 1.05 2.84.8.09-.63.34-1.05.62-1.29-2.18-.25-4.47-1.09-4.47-4.85 0-1.07.38-1.95 1.01-2.64-.1-.25-.44-1.25.1-2.6 0 0 .82-.26 2.7 1.01a9.3 9.3 0 0 1 4.92 0c1.88-1.27 2.7-1.01 2.7-1.01.54 1.35.2 2.35.1 2.6.63.69 1.01 1.57 1.01 2.64 0 3.77-2.29 4.6-4.48 4.84.35.3.67.9.67 1.82v2.7c0 .26.17.56.66.47A9.75 9.75 0 0 0 12 2.5Z"/></svg> shendyrn-dev</a>
+          <a href="#" className="hover:text-white dark:hover:text-black">Docs</a>
+          <a href="#" className="hover:text-white dark:hover:text-black">Changelog</a>
+          <a href="#" className="hover:text-white dark:hover:text-black">Privacy</a>
+        </span>
       </div>
     </footer>
   );
