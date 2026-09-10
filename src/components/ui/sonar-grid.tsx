@@ -207,6 +207,7 @@ export function SonarGrid({
     let lastMove = 0
     const onMove = (e: PointerEvent) => {
       if (!opts.current.interactive || reduceMotion.matches) return
+      if (e.pointerType === "touch") return
       const now = performance.now()
       if (now - lastMove < 90) return
       lastMove = now

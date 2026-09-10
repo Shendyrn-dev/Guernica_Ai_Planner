@@ -93,7 +93,7 @@ export function Cta69({
         </div>
       )}
 
-      <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 text-center md:px-6">
+      <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 text-center sm:px-6">
         {badge && (
           <Reveal y={14}>
             <Badge7 label={badge.label} />
@@ -101,14 +101,14 @@ export function Cta69({
         )}
         {heading && (
           <Reveal delay={0.06} y={20}>
-            <h2 className="text-balance text-4xl font-bold leading-[1.05] tracking-tight text-foreground md:text-6xl lg:text-7xl">
+            <h2 className="text-balance text-3xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-4xl md:text-6xl lg:text-7xl">
               {heading}
             </h2>
           </Reveal>
         )}
         {labels.note && (
           <Reveal delay={0.14} y={14}>
-            <p className="mt-6 max-w-xl text-balance text-lg text-muted-foreground md:text-xl">{labels.note}</p>
+            <p className="mt-6 max-w-xl text-balance text-base text-muted-foreground sm:text-lg md:text-xl">{labels.note}</p>
           </Reveal>
         )}
         {button && (

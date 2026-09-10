@@ -48,14 +48,17 @@
 @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
 * { border-color: var(--border); }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
+img, video, canvas, svg { max-width: 100%; }
 ::selection { background: #0a0a0a; color: #fff; }
 @media (prefers-color-scheme: dark) {
   ::selection { background: #fff; color: #0a0a0a; }
